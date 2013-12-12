@@ -1,10 +1,13 @@
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
+from acca.stream import Stream
 import pika
 
 class Consumer(object):
     def __init__(self, stream, limit):
         self._stream = stream
+        if not isinstance(stream, Stream):
+            raise TypeError("stream must be acca.stream.Stream")
         self._limit = limit
     def consume(channel):
         pass
@@ -16,7 +19,7 @@ class QueueConsumer(Consumer):
 
     def _on_message(self, channel, method, properties, body):
         self._limit = self._limit - 1
-        self._stream.write(body)
+        self._stream.put(properties, body)
         channel.basic_ack(delivery_tag = method.delivery_tag)
         if self._limit == 0:
             def _on_cancelok(frame):
